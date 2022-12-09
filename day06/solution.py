@@ -3,7 +3,7 @@ buffer = "zdrrgvvntvtzzssgcgqqbvqqzmqmrrprjjpmpwpvpqpwppfqqnvvjbjcbbrnnvwnvnqnnc
 
 def find_marker(n_distinct):
     i = n_distinct
-    while len(set(buffer[i - n_distinct:i])) < len(buffer[i - n_distinct:i]):
+    while len(set(buffer[i - n_distinct:i])) < n_distinct:
         i += 1
     return i
 
