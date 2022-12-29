@@ -19,11 +19,13 @@ def calculate_neighbours(r, c):
 
 
 def height(char):
-    if char == "S":
-        return ord("a")
-    elif char == "E":
-        return ord("z")
-    return ord(char)
+    match char:
+        case "S":
+            return ord("a")
+        case "E":
+            return ord("z")
+        case _:
+            return ord(char)
 
 
 neighbours = {}
