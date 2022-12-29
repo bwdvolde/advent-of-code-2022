@@ -17,15 +17,15 @@ while True:
 
 
 def is_in_right_order(left, right):
-    if isinstance(left, int) and isinstance(right, int):
-        if left == right:
-            return 0
-        return -1 if left < right else 1
-    if isinstance(left, int):
-        return is_in_right_order([left], right)
-    if isinstance(right, int):
-        return is_in_right_order(left, [right])
     match (left, right):
+        case (int(), int()):
+            if left == right:
+                return 0
+            return -1 if left < right else 1
+        case (int(), list()):
+            return is_in_right_order([left], right)
+        case (list(), int()):
+            return is_in_right_order(left, [right])
         case ([], []):
             return 0
         case ([*_], []):
