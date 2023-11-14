@@ -1,7 +1,7 @@
 import math
-from copy import deepcopy
 from dataclasses import dataclass
 from functools import lru_cache
+from queue import Queue
 
 from read_file.read_file import read_file
 
@@ -81,45 +81,39 @@ def calculate_occupied_positions(time):
 
 FAKE_NONE_VALUE = "none"
 
+FIRST_TO_END_DESTINATION = 0
+TO_START_DESTINATION = 1
+SECOND_TO_END_DESTINATION = 2
+
 
 def calculate_shortest_length():
-    cache = {}
+    queue = Queue()
 
-    upper_bound = 1000
+    mod_to_use = math.lcm(width, height)
 
-    def recurse(position, current_time):
-        nonlocal upper_bound
-        if current_time >= upper_bound:
-            return FAKE_NONE_VALUE
-        current_time_mod = current_time
-        cache_key = (position, current_time_mod)
-        if cache_key in cache:
-            return cache[cache_key]
+    queue.put((0, start_position, FIRST_TO_END_DESTINATION))
+    visited = {0, start_position, FIRST_TO_END_DESTINATION}
+    while True:
+        time, position, part = queue.get()
+        if position == end_position and part == SECOND_TO_END_DESTINATION:
+            return time
 
-        if position == end_position:
-            upper_bound = min(upper_bound, current_time)
-            print(upper_bound)
-            return 0
+        new_part = part
+        if part == FIRST_TO_END_DESTINATION and position == end_position:
+            new_part = TO_START_DESTINATION
+        elif part == TO_START_DESTINATION and position == start_position:
+            new_part = SECOND_TO_END_DESTINATION
 
-        result = FAKE_NONE_VALUE
-
-        occupied_positions = calculate_occupied_positions(current_time_mod)
-        is_valid_position = position == start_position or (
-                0 <= position.row < height and 0 <= position.col < width and position not in occupied_positions)
-        if is_valid_position:
-            possible_shortest_lengths = []
-            for direction in ALL_DIRECTIONS:
-                recursive_result = recurse(position + direction, current_time + 1)
-                if recursive_result is not FAKE_NONE_VALUE:
-                    possible_shortest_lengths.append(recursive_result)
-
-            if possible_shortest_lengths:
-                result = min(possible_shortest_lengths) + 1
-
-        cache[cache_key] = result
-        return result
-
-    return recurse(start_position, 0)
+        for direction in ALL_DIRECTIONS:
+            new_position = position + direction
+            new_time = time + 1
+            occupied_positions = calculate_occupied_positions(new_time % mod_to_use)
+            key = (new_time % mod_to_use, new_position, new_part)
+            is_valid_position = new_position in [start_position, end_position] or (
+                    0 <= new_position.row < height and 0 <= new_position.col < width)
+            if is_valid_position and new_position not in occupied_positions and key not in visited:
+                visited.add(key)
+                queue.put((new_time, new_position, new_part))
 
 
-print(f"Part 1: {calculate_shortest_length()}")
+print(f"Part 2: {calculate_shortest_length()}")
